@@ -1,0 +1,8 @@
+func main() {
+    fib(5);
+}
+
+func fib(n) {
+    if (n < 3) 1;
+    else fib(n-1) + fib(n-2);
+}

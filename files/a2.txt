@@ -1,0 +1,21 @@
+function,main:function,main
+arg,99:return_variable,return_variable
+add,96:numeric,98:numeric,97:numeric
+add,95:numeric,98:numeric,97:numeric
+add,92:numeric,94:numeric,93:numeric
+add,91:numeric,94:numeric,93:numeric
+add,89:numeric,91:numeric,90:numeric
+add,88:numeric,91:numeric,90:numeric
+mult,85:numeric,87:numeric,86:numeric
+mult,84:numeric,87:numeric,86:numeric
+mult,82:numeric,95:numeric,56
+assign,83:numeric,82:numeric
+mult,81:numeric,88:numeric,8
+add,83:numeric,83:numeric,81:numeric
+mult,80:numeric,84:numeric,1
+add,83:numeric,83:numeric,80:numeric
+get the base addr for f from the stack
+calculate the indirect address
+add,a:local_variable,(f),83:numeric
+assign,[object Object],a:local_variable
+end_function,main

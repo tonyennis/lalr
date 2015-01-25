@@ -1,0 +1,16 @@
+func e(incount) {
+	denom = 1;
+	sum = 1;
+	previous = 1;
+	count = incount;
+	while(count > 0) {
+		previous = previous * denom;
+		sum = sum + (1/previous);
+		denom = denom + 1;
+		count = count - 1;
+	    }
+	sum;
+	}
+func main() {
+    e(30);
+    }

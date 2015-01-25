@@ -1,0 +1,149 @@
+	lda	#$0
+	pha
+	jsp	$label_main
+	hlt
+;	function , e:function , e
+label_e:
+;	**********************************************
+;	* Stack frame information
+;	* arg	99:argument_return_variable	offset:12
+;	* arg	incount:argument_variable	offset:11
+;	* decl	93:numeric_temp	offset:9
+;	* decl	94:numeric_temp	offset:8
+;	* decl	95:numeric_temp	offset:7
+;	* decl	96:numeric_temp	offset:6
+;	* decl	97:numeric_temp	offset:5
+;	* decl	98:numeric_temp	offset:4
+;	* decl	count:local_variable	offset:3
+;	* decl	previous:local_variable	offset:2
+;	* decl	sum:local_variable	offset:1
+;	* decl	denom:local_variable	offset:0
+;	**********************************************
+	tsx
+	txa
+	sbc	#$10
+	tax
+	txs
+;	assign  , denom:local_variable , 1:integer_const
+	tsx
+	lda	#$1
+	sta	$0,X
+;	assign  , sum:local_variable , 1:integer_const
+	tsx
+	lda	#$1
+	sta	$1,X
+;	assign  , previous:local_variable , 1:integer_const
+	tsx
+	lda	#$1
+	sta	$2,X
+;	assign  , count:local_variable , incount:argument_variable
+	tsx
+	lda	($11,X)
+	sta	$3,X
+;	label  , 92:label
+label_92:
+;	test_gt  , 98:numeric_temp , count:local_variable , 0:integer_const
+	tsx
+	lda	#$1
+	sta	$4,X
+	lda	($3,X)
+	cmp	#$0
+	bpl	$label_L0
+	lda	#$0
+	sta	$4,X
+label_L0:
+;	goto_if_false  , 91:label , 98:numeric_temp
+	tsx
+	lda	($4,X)
+	beq	$label_91
+;	mult  , previous:local_variable , previous:local_variable , denom:local_variable
+	tsx
+	lda	($2,X)
+	mul	($0,X)
+	sta	$2,X
+;	div  , 96:numeric_temp , 1:integer_const , previous:local_variable
+	tsx
+	lda	#$1
+	div	($2,X)
+	sta	$6,X
+;	add  , sum:local_variable , sum:local_variable , 96:numeric_temp
+	tsx
+	lda	($1,X)
+	adc	($6,X)
+	sta	$1,X
+;	add  , denom:local_variable , denom:local_variable , 1:integer_const
+	tsx
+	lda	($0,X)
+	adc	#$1
+	sta	$0,X
+;	subtract  , count:local_variable , count:local_variable , 1:integer_const
+	tsx
+	lda	($3,X)
+	sbc	#$1
+	sta	$3,X
+;	goto  , 92:label
+	jmp	$label_92
+;	label  , 91:label
+label_91:
+;	assign  , 99:argument_return_variable , sum:local_variable
+	tsx
+	lda	($1,X)
+	sta	$12,X
+;	pop  , 10
+	tsx
+	txa
+	adc	#$10
+	tax
+	txs
+;	end_function  , e
+	rts
+;	function  , main:function , main
+label_main:
+;	**********************************************
+;	* Stack frame information
+;	* arg	99:argument_return_variable	offset:2
+;	* decl	98:numeric_temp	offset:0
+;	**********************************************
+	tsx
+	txa
+	sbc	#$1
+	tax
+	txs
+;	push_return_arg  , 1
+	lda	#$0
+	tsx
+	sta	$-1,X
+;	push_arg  , 30:integer_const , 2
+	lda	#$30
+	tsx
+	sta	$-2,X
+;	push_arg_count  , 2
+	tsx
+	txa
+	sbc	#$2
+	tax
+	txs
+;	call  , e:function , e
+	jsp	$label_e
+;	pop  , 1
+	tsx
+	txa
+	adc	#$1
+	tax
+	txs
+;	retval  , 98:numeric_temp
+	pla
+	tsx
+	sta	$0,X
+;	assign  , 99:argument_return_variable , 98:numeric_temp
+	tsx
+	lda	($0,X)
+	sta	$2,X
+;	pop  , 1
+	tsx
+	txa
+	adc	#$1
+	tax
+	txs
+;	end_function  , main
+	rts

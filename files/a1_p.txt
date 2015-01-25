@@ -1,0 +1,9 @@
+func e(x, y, z) {
+	a = x;
+	b = y;
+	c = z;
+	a+b+c;
+	}
+func main() {
+    e(10, 11, 12);
+    }

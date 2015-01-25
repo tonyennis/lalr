@@ -1,0 +1,33 @@
+	lda	#$0
+	pha
+	jsp	$label_main
+	hlt
+;	function , main:function , main
+label_main:
+;	******************************************************************
+;	* Stack frame information
+;	* arg	99:argument_return_variable	offset:7
+;	* decl	f:local_variable	offset:5	bounds:6,7,8
+;	* decl	e:local_variable	offset:4	bounds:4,5
+;	* decl	d:local_variable	offset:3	bounds:3
+;	* decl	c:local_variable	offset:2
+;	* decl	b:local_variable	offset:1
+;	* decl	a:local_variable	offset:0
+;	******************************************************************
+	tsx
+	txa
+	sbc	#$6
+	tax
+	txs
+;	assign  , 99:argument_return_variable , 1:integer_const
+	tsx
+	lda	#$1
+	sta	$7,X
+;	pop  , 6
+	tsx
+	txa
+	adc	#$6
+	tax
+	txs
+;	end_function  , main
+	rts

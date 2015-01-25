@@ -1,0 +1,11 @@
+func f(count) {
+	if (count == 1) {
+	    result = 1;
+	} else {
+	   result = count * f(count-1);
+	}
+    result;
+	}
+func main() {
+    f(7);
+    }

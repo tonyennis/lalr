@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+	<meta charset="UTF-8">
+	<title></title>
+</head>
+<body>
+
+<header 1>Take 3</header>
+
+Production - A production name followed by a list of terminals and non-terminals.
+Grammar - the original grammar. It's a list of productions with one production being the start production.
+Dotted production - a production augmented with a marker that tells which symbol on the RHS is next.
+Kernal - a list of dotted productions
+Itemset - includes a kernal and a list of dotted productions. The kernal is unique to this itemset.
+
+
+Begin:
+	For Grammar G with start symbol S, create a kernal K with artificial dotted production S' -> .S
+	Create An Itemset From a Kernal K
+	exit
+
+To fill out an itemset I:
+	create an empty queue Q
+	For each production P in the kernal
+		add P onto the queue
+	fend
+	while Q is not empty
+		pop P from Q
+		if P->a.B does not already exist in I,
+			add it to I.
+			if P->a.B is a non-terminal
+				copy all B->* from G. Call this list of productions X.
+				for each production B in X
+					convert B to a dotted production C
+					Push C onto Q
+				fend
+			fi
+	wend
+	Create More Itemsets from I
+
+To Create More Itemsets from I:
+	Find all S symbols P->a.S, where S is not empty
+	for each symbol Y in S
+		Create an empty kernal K
+		find all productions P such that P->a.Y
+		for each production A in P
+			if A's dot can be advanced
+				advance A's dot
+				add A to K
+		fend
+		if K is not empty
+			Create an Itemset From a Kernal of K
+	fend
+
+To create An Itemset From a Kernal K:
+	If an itemset with K already exists, return false.
+	create an itemset I with a kernal of K
+	Fill Out Itemset I
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<header 1>Take 2</header>
+
+<ol>
+	<li>Let G be the starting grammar in BNF</li>
+	<li>Let L be a list of incomplete itemlists</li>
+	<li>Let C be a list of complete underived itemlists. It starts empty.</li>
+	<li>Let D be a list of complete derived itemlists. It starts empty.</li>
+	<li>note - a recursive algorithm will surely render unneeded one of C or D though it will be handy to process from C and move completed itemsets to D.</li>
+	<li>Create an <i>incomplete itemlist</i> I from G consisting of S'->S, where S' is an artificial start state and S is G's start state.</li>
+	<li>Push I onto L</li>
+</ol>
+
+Create an incomplete itemlist I that is S->P, where S is an artificial start prod and P is G's start production.
+Push I onto L
+
+To fill out a kernal K:
+	if any itemset has a kernal of K, return (discarding this K)
+	For each production P in K
+
+While L is not empty
+	I = pop L. This I is a 'kernal'. I is a production from the grammar
+	If any complete (derived or underived) itemlist has a kernel of I,
+		discard I
+	Else
+		Create an underived itemlist(I)
+
+To create an underived itemlist(I)
+	push I into a work queue Q.
+	create an empty itemlist E
+	while Q is not empty
+		pop a production A from Q
+		switch A->a(dot)B:
+			B is a terminal
+				move B to E if A->a(dot)B is not already there
+			B is a non-terminal
+				for each production P in G beginning with B
+					set P's dot to position 0
+					if P is not already in E,
+						add P to E
+						push P onto Q.
+					else
+						ignore P
+				fend
+			B is empty
+				Ignore A
+		wend switch
+	wend
+	call derive itemlist(E)
+
+to derive itemlist(C)
+	find all next symbols in C
+	find production groups that are looking for the symbols.
+	for each production group
+		for each production in the production group
+			advance the dot
+			discard the production if the dot is off the right end
+		fend
+	fend
+	push the production group onto L
+	move C to the derived list D
+
+
+COMPLETE an incomplete itemlist I:
+<ol>
+	<li>Create a complete itemlist A</li>
+	<li>Find all symbols S where I(any P)->a.S</li>
+	<li>For each production set P where P->a.S</li>
+	<ol>
+		<li>if P->nextDot is a terminal, MOVE P to A unless it is already in A.</li>
+		<li>else if P->nextDot is a non-terminal N and P->nextDot is not in A, MOVE push all G(N->*) onto I unless it is already there (more unprocessed productions) </li>
+	</ol>
+	<li>Push the now-closed itemlist I onto the closed list C unless it duplicates an itemlist already on D.</li>
+
+
+
+
+
+
+
+	<ol>
+		<li>Remove an X from L. We intend to convert the incomplete itemlist X into a complete underived itemlist I.</li>
+		<li>Create an empty I. Mark it as <i>underived</i> which means we have not yet found the itemlists to which this I points</li>
+		<li>Close I by:</li>
+		<ol>
+			<li>Find all symbols S where I(any P)->a.S</li>
+			<li>For each production set P where P->a.S</li>
+			<ol>
+				<li>if P->nextDot is a terminal, add P to I unless it is already in I.</li>
+				<li>else if P->newDot is a non-terminal N, push all G(N->*) onto I unless it is already there (more unprocessed productions) </li>
+			</ol>
+			<li>Push the now-closed itemlist I onto the closed list C unless it duplicates an itemlist already on D.</li>
+		</ol>
+	</ol>
+	<li>While there are underived itemlists U on C</li>
+	<ol>
+		<li>Mark U as derived so it does not get derived again</li>
+		<li>Find all symbols S in U at the dot (note that U->AB. has no symbol and drops off.)</li>
+		<li>for each group A of items in U where S is the dot symbol</li>
+		<ol>
+			<li>Create from A a new itemlist B</li>
+			<li>Advance B's dots</li>
+			<li>Add B to L</li>
+		</ol>
+	</ol>
+</ol>
+</body>
+</html>

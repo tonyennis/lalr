@@ -1,0 +1,11 @@
+func main() {
+    denom = 1;
+    sum = 0;
+    toggle = 1;
+    while(denom < 20000) {
+        sum = sum + toggle*4/denom;
+        denom = denom + 2;
+        toggle = toggle * (0-1);
+    }
+    sum;
+}
