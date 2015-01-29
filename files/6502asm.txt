@@ -6,27 +6,117 @@
 label_main:
 ;	******************************************************************
 ;	* Stack frame information
-;	* arg	99:argument_return_variable	offset:7
-;	* decl	f:local_variable	offset:5	bounds:6,7,8
-;	* decl	e:local_variable	offset:4	bounds:4,5
-;	* decl	d:local_variable	offset:3	bounds:3
-;	* decl	c:local_variable	offset:2
-;	* decl	b:local_variable	offset:1
-;	* decl	a:local_variable	offset:0
+;	* return_variable	99:numeric	offset:28
+;	* argument_variable	q:numeric	offset:27
+;	* local_variable	79:numeric	offset:25
+;	* local_variable	80:numeric	offset:24
+;	* local_variable	81:numeric	offset:23
+;	* local_variable	82:numeric	offset:22
+;	* local_variable	83:numeric	offset:21
+;	* local_variable	84:numeric	offset:20
+;	* local_variable	85:numeric	offset:19
+;	* local_variable	86:numeric	offset:18
+;	* local_variable	87:numeric	offset:17
+;	* local_variable	88:numeric	offset:16
+;	* local_variable	89:numeric	offset:15
+;	* local_variable	90:numeric	offset:14
+;	* local_variable	91:numeric	offset:13
+;	* local_variable	92:numeric	offset:12
+;	* local_variable	93:numeric	offset:11
+;	* local_variable	94:numeric	offset:10
+;	* local_variable	95:numeric	offset:9
+;	* local_variable	96:numeric	offset:8
+;	* local_variable	97:numeric	offset:7
+;	* local_variable	98:numeric	offset:6
+;	* local_variable	f:numeric	offset:5	bounds:6,7,8
+;	* local_variable	e:numeric	offset:4	bounds:4,5
+;	* local_variable	d:numeric	offset:3	bounds:3
+;	* local_variable	c:numeric	offset:2
+;	* local_variable	b:numeric	offset:1
+;	* local_variable	a:numeric	offset:0
 ;	******************************************************************
 	tsx
 	txa
-	sbc	#$6
+	sbc	#$26
 	tax
 	txs
-;	assign  , 99:argument_return_variable , 1:integer_const
+;	add  , 96:numeric , 98:numeric , 97:numeric
 	tsx
-	lda	#$1
-	sta	$7,X
-;	pop  , 6
+	lda	($6,X)
+	adc	($7,X)
+	sta	$8,X
+;	add  , 95:numeric , 98:numeric , 97:numeric
+	tsx
+	lda	($6,X)
+	adc	($7,X)
+	sta	$9,X
+;	add  , 92:numeric , 94:numeric , 93:numeric
+	tsx
+	lda	($10,X)
+	adc	($11,X)
+	sta	$12,X
+;	add  , 91:numeric , 94:numeric , 93:numeric
+	tsx
+	lda	($10,X)
+	adc	($11,X)
+	sta	$13,X
+;	add  , 89:numeric , 91:numeric , 90:numeric
+	tsx
+	lda	($13,X)
+	adc	($14,X)
+	sta	$15,X
+;	add  , 88:numeric , 91:numeric , 90:numeric
+	tsx
+	lda	($13,X)
+	adc	($14,X)
+	sta	$16,X
+;	mult  , 85:numeric , 87:numeric , 86:numeric
+	tsx
+	lda	($17,X)
+	mul	($18,X)
+	sta	$19,X
+;	mult  , 84:numeric , 87:numeric , 86:numeric
+	tsx
+	lda	($17,X)
+	mul	($18,X)
+	sta	$20,X
+;	mult  , 82:numeric , 95:numeric , 56
+	tsx
+	lda	($9,X)
+	mul	#$56
+	sta	$22,X
+;	assign  , 83:numeric , 82:numeric
+	tsx
+	lda	($22,X)
+	sta	$21,X
+;	mult  , 81:numeric , 88:numeric , 8
+	tsx
+	lda	($16,X)
+	mul	#$8
+	sta	$23,X
+;	add  , 83:numeric , 83:numeric , 81:numeric
+	tsx
+	lda	($21,X)
+	adc	($23,X)
+	sta	$21,X
+;	mult  , 80:numeric , 84:numeric , 1
+	tsx
+	lda	($20,X)
+	mul	#$1
+	sta	$24,X
+;	add  , 83:numeric , 83:numeric , 80:numeric
+	tsx
+	lda	($21,X)
+	adc	($24,X)
+	sta	$21,X
+;	assign  , 99:numeric , a:numeric
+	tsx
+	lda	($0,X)
+	sta	$28,X
+;	pop  , 26
 	tsx
 	txa
-	adc	#$6
+	adc	#$26
 	tax
 	txs
 ;	end_function  , main

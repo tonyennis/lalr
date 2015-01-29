@@ -47,9 +47,6 @@ mult,81:numeric,88:numeric,8
 add,83:numeric,83:numeric,81:numeric
 mult,80:numeric,84:numeric,1
 add,83:numeric,83:numeric,80:numeric
-get the base addr for f from the stack
-calculate the indirect address
-add,a:numeric,(f),83:numeric
 assign,99:numeric,a:numeric
 pop,26
 end_function,main

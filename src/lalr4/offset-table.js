@@ -149,7 +149,7 @@ OffsetTable.prototype.getStackFrameVariables = function () {
 	var keys = Object.keys(this.table);
 	for(var i = 0; i<keys.length; i++) {
 		var e = this.table[keys[i]];
-		if (OffsetTable.STACK_FRAME_VARIABLE_TYPES.indexOf(e.type) >= 0) stackFrameVariables.push(e);
+		if (OffsetTable.STACK_FRAME_VARIABLE_TYPES.indexOf(e.usage) >= 0) stackFrameVariables.push(e);
 	}
 	return stackFrameVariables;
 };
