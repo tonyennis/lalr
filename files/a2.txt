@@ -1,5 +1,38 @@
 function,main:function,main
-arg,99:return_variable,return_variable
+arg,q:numeric,argument_variable
+arg,99:numeric,return_variable
+declare,a:numeric,numeric
+declare,b:numeric,numeric
+declare,c:numeric,numeric
+declare,d:numeric,numeric
+declare,e:numeric,numeric
+declare,f:numeric,numeric
+declare,98:numeric,numeric
+declare,97:numeric,numeric
+declare,96:numeric,numeric
+declare,95:numeric,numeric
+declare,94:numeric,numeric
+declare,93:numeric,numeric
+declare,92:numeric,numeric
+declare,91:numeric,numeric
+declare,90:numeric,numeric
+declare,89:numeric,numeric
+declare,88:numeric,numeric
+declare,87:numeric,numeric
+declare,86:numeric,numeric
+declare,85:numeric,numeric
+declare,84:numeric,numeric
+declare,83:numeric,numeric
+declare,82:numeric,numeric
+declare,81:numeric,numeric
+declare,80:numeric,numeric
+declare,79:numeric,numeric
+array,d:numeric,3
+array,e:numeric,4
+array,e:numeric,5
+array,f:numeric,6
+array,f:numeric,7
+array,f:numeric,8
 add,96:numeric,98:numeric,97:numeric
 add,95:numeric,98:numeric,97:numeric
 add,92:numeric,94:numeric,93:numeric
@@ -16,6 +49,7 @@ mult,80:numeric,84:numeric,1
 add,83:numeric,83:numeric,80:numeric
 get the base addr for f from the stack
 calculate the indirect address
-add,a:local_variable,(f),83:numeric
-assign,[object Object],a:local_variable
+add,a:numeric,(f),83:numeric
+assign,99:numeric,a:numeric
+pop,26
 end_function,main

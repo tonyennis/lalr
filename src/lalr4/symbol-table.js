@@ -77,8 +77,18 @@ SymbolTable.prototype.addId = function (_symbolName, _type, _isConstant, _consta
 	var isTemp = false;
 	var isConstant = _isConstant || false;
 	var usage = _usage || SymbolTable.LOCAL_VARIABLE_TYPE;
-	var type = _type || _usage || SymbolTable.NUMERIC_TYPE;
-	var symbolName = _symbolName || undefined;
+	var type;
+	if (SymbolTable.USAGE_NOT_ON_LHS.indexOf(usage) >= 0) {
+		isConstant = true;
+		// If there is no type (and we know that this is a special usage) use the usage as the type. Bad idea? Maybe.
+		// Otherwise, use the given type.
+		type = _type ? _type : usage;
+	} else {
+		// Use the given type or the numeric default.
+		type = _type || SymbolTable.NUMERIC_TYPE;
+	}
+
+	var symbolName = _symbolName;// || undefined;
 
 	if (SymbolTable.USAGE_NOT_ON_LHS.indexOf(usage) >= 0) isConstant = true;
 
@@ -136,7 +146,7 @@ SymbolTable.prototype.getLocalVariables = function () {
 	var entries = [];
 	var self = this;
 	Object.keys(this.table).forEach(function (k) {
-		if (self.table[k].type === SymbolTable.LOCAL_VARIABLE_TYPE) entries.push(self.table[k]);
+		if (self.table[k].usage === SymbolTable.LOCAL_VARIABLE_TYPE) entries.push(self.table[k]);
 	});
 	return entries;
 };
@@ -164,7 +174,7 @@ SymbolTable.prototype.getReturnVariableName = function () {
 	var keys = Object.keys(this.table);
 	for (var i = 0; i < keys.length; i++) {
 		var entry = this.table[keys[i]];
-		if (entry.usage === SymbolTable.RETURN_VARIABLE_TYPE) return entry;
+		if (entry.usage === SymbolTable.RETURN_VARIABLE_TYPE) return entry.name;
 	}
 	return undefined;
 };
@@ -185,7 +195,7 @@ SymbolTable.prototype.reset = function () {
  * flag.  This will allow the code generator to divine the return variable.
  */
 SymbolTable.prototype.getReturnTemp = function () {
-	return this.addId(undefined, undefined, undefined, undefined, SymbolTable.RETURN_VARIABLE_TYPE);
+	return this.addId(undefined, SymbolTable.NUMERIC_TYPE, undefined, undefined, SymbolTable.RETURN_VARIABLE_TYPE);
 };
 
 /**

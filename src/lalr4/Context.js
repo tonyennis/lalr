@@ -21,6 +21,14 @@ var Context = module.exports = function Context() {
 	this.handle = undefined;
 };
 
+Context.prototype.setUsage = function (h) {
+	this.usage = h;
+};
+
+Context.prototype.getUsage = function () {
+	return this.usage;
+};
+
 Context.prototype.setHandle = function (h) {
 	this.handle = h;
 };
@@ -108,23 +116,3 @@ Context.prototype.toString = function () {
 	}
 	return s;
 };
-//Context.prototype.addText = function (newText) {
-//	if (newText instanceof 'Array') {
-//		for (var i = 0; i < newText.length; i++) this.text.push(newText[i]);
-//	} else {
-//		this.text.push(newText);
-//	}
-//};
-//Context.prototype.concatText = function (newText) {
-//	if (this.text.length > 0) {
-//		this.text[this.text.length - 1] += newText;
-//	} else {
-//		this.addText(newText);
-//	}
-//};
-//Context.prototype.getText = function () {
-//	return this.text;
-//};
-//Context.prototype.clearText = function () {
-//	this.text = [];
-//};

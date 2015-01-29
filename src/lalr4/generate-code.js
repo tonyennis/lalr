@@ -17,10 +17,10 @@ var patterns = [
 	['const', /^\d+:[a-z]+_const/],
 	['label_name', /^\d+:label/],
 	['ext_id', /^[0-9A-Za-z_]+:[A-Za-z_]+/],
-	['id', /^(argument_return_variable)/],
+	[undefined, /^(argument_variable|return_variable)/],
 	[undefined, /^(function|arg|declare|end_function|local_variable|,|assign|label|goto_if_false|goto)/],
 	[undefined, /^(numeric_temp|mult|div|add|subtract|push_arg_count|push_arg|push_return_arg|call|pop|retval|result)/],
-	[undefined, /^(test_lt|test_eq|test_gt|array)/],
+	[undefined, /^(test_lt|test_eq|test_gt|array|numeric)/],
 	['id', /^[A-Za-z_]+/],
 	['float', /^\d+\.\d*/],
 	['float', /^\d*\.\d+/],
@@ -194,18 +194,19 @@ var prods = [
 			ot.addDim(v, bound);
 			context.setHandle("(ARRAY_DECLS)");
 		}),
-		new Production("ALL_ARGS", ['ARGS'], function (context, stack, sourceLine) {
+		new Production('ALL_ARGS', ['ARGS'], function (context, stack, sourceLine) {
 			if (stack[0].val.getHandle() !== "") {
-				ot.orderedAdd(getVarName(stack[0].val), 'arg');
+				ot.orderedAdd(getVarName(stack[0].val), stack[0].val.getUsage());
 				context.appendContext(stack[0].val);
 			}
 		}),
 		new Production("ARGS", ['ARG', 'ARGS'], function (context, stack, sourceLine) {
 			if (stack[2].val.getHandle() !== "") {
-				ot.orderedAdd(getVarName(stack[2].val), 'arg');
+				ot.orderedAdd(getVarName(stack[2].val), stack[2].val.getUsage());
 				context.appendContext(stack[2].val);
 			}
 			context.setHandle(stack[0].val.getHandle());
+			context.setUsage(stack[0].val.getUsage());
 			context.appendContext(stack[0].val);
 		}),
 		new Production("ARGS", [''], function (context, stack, sourceLine) {
@@ -213,13 +214,13 @@ var prods = [
 		}),
 		new Production("ALL_DECLS", ['DECLS'], function (context, stack, sourceLine) {
 			if (stack[0].val.getHandle() !== "") {
-				ot.orderedAdd(getVarName(stack[0].val), 'decl');
+				ot.orderedAdd(getVarName(stack[0].val), OffsetTable.LOCAL_VARIABLE_TYPE);
 				context.appendContext(stack[0].val);
 			}
 		}),
 		new Production("DECLS", ["DECL", "DECLS"], function (context, stack, sourceLine) {
 			if (stack[2].val.getHandle() !== "") {
-				ot.orderedAdd(getVarName(stack[2].val), 'decl');
+				ot.orderedAdd(getVarName(stack[2].val), OffsetTable.LOCAL_VARIABLE_TYPE);
 				context.appendContext(stack[2].val);
 			}
 			context.setHandle(stack[0].val.getHandle());
@@ -228,21 +229,19 @@ var prods = [
 		new Production("DECLS", [""], function (context, stack, sourceLine) {
 			context.setHandle("");
 		}),
-		new Production("ARG", ['arg', COMMA, 'ext_id', COMMA, 'id'], function (context, stack, sourceLine) {
+		new Production("ARG", ['arg', COMMA, 'ext_id', COMMA, 'ARG_USAGE'], function (context, stack, sourceLine) {
 			context.append([fmtSource(sourceLine)]);
 			//context.appendCode([stack[0].val, stack[4].val, stack[8].val]);
+			context.setUsage(stack[8].val.getHandle());
 			context.setHandle(stack[4].val);
 		}),
-		new Production("ARG", ['arg', COMMA, 'ext_id', COMMA, 'argument_return_variable'], function (context, stack, sourceLine) {
-			context.append([fmtSource(sourceLine)]);
-			//context.appendCode([stack[0].val, stack[4].val, stack[8].val]);
-			context.setHandle(stack[4].val);
+		new Production("ARG_USAGE", ['argument_variable'], function (context, stack) {
+			context.setHandle(stack[0].val);
 		}),
-		new Production("ARG", ['arg', COMMA, 'ext_id', COMMA, 'ext_id'], function (context, stack, sourceLine) {
-			context.append([fmtSource(sourceLine)]);
-			//context.appendCode([stack[0].val, stack[4].val, stack[8].val]);
-			context.setHandle(stack[4].val);
+		new Production("ARG_USAGE", ['return_variable'], function (context, stack) {
+			context.setHandle(stack[0].val);
 		}),
+
 		new Production("DECL", ['declare', COMMA, "ext_id", COMMA, 'DECL_VAR_TYPES'], function (context, stack, sourceLine) {
 			context.append([fmtSource(sourceLine)]);
 			//context.appendCode([stack[0].val, stack[4].val, stack[8].val]);
@@ -251,7 +250,7 @@ var prods = [
 		new Production("DECL_VAR_TYPES", ['numeric_temp'], function (context, stack, sourceLine) {
 			context.setHandle(stack[0].val);
 		}),
-		new Production("DECL_VAR_TYPES", ['local_variable'], function (context, stack, sourceLine) {
+		new Production("DECL_VAR_TYPES", ['numeric'], function (context, stack, sourceLine) {
 			context.setHandle(stack[0].val);
 		}),
 		new Production("BODY", ["BODY", "PART"], Context.straightCopy),
@@ -370,7 +369,11 @@ var prods = [
 			]);
 			context.setHandle(stack[4].val.getHandle());
 		}),
-		new Production("VARIOUS_RHS", ["const"], function (context, stack, sourceLine) {
+		new Production("VARIOUS_RHS", ["float"], function (context, stack, sourceLine) {
+			ot.orderedAdd(stack[0].val, "(VARIOUS_RHS)");
+			context.setHandle(stack[0].val);
+		}),
+		new Production("VARIOUS_RHS", ["integer"], function (context, stack, sourceLine) {
 			ot.orderedAdd(stack[0].val, "(VARIOUS_RHS)");
 			context.setHandle(stack[0].val);
 		}),
@@ -407,7 +410,7 @@ var logger = new StringLogger();
 var lalr1 = new LALR1().build(prods);
 
 var reductions = new Reductions(logger);
-var parser = new LALR1Parser(logger);
+var parser = new LALR1Parser();
 var options = {
 	showStack: 0,
 	showTable: 0,
@@ -419,9 +422,9 @@ var options = {
 	showFirstAndFollow: 0
 };
 var result = parser.parse(lalr1, inputStream, reductions, options);
-console.log("----");
-console.log(logger.out());
-console.log("*************************");
+//console.log("----");
+//console.log(logger.out());
+//console.log("*************************");
 //console.log("Symbol table");
 //Object.keys(symbolTable).forEach(function (k) {
 //	var stRow = symbolTable[k];
@@ -434,4 +437,4 @@ console.log("*************************");
 //	}
 //}
 
-fs.writeFileSync(outfile, result.toString(), {encoding: 'utf8'});
+if (result) fs.writeFileSync(outfile, result.toString(), {encoding: 'utf8'});

@@ -1,4 +1,4 @@
-func main() {
+func main(q) {
     float a, b, c;
     float d[3], e[4][5], f[6][7][8];
 

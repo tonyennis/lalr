@@ -38,7 +38,7 @@ var binop = function (context, stack, op) {
 
 	context.appendContext(first);
 	context.appendContext(second);
-	var v = st.addId();	// With no (first) argument, makes a temp variable.
+	var v = st.addId(undefined, SymbolTable.NUMERIC_TYPE);	// With no (first) argument, makes a temp variable.
 	context.appendCode([op, v, first.getHandle(), second.getHandle()], v);
 	binopRaw(context, op, first.getHandle(), second.getHandle());
 };
@@ -53,19 +53,19 @@ var binop = function (context, stack, op) {
  */
 var binopRaw = function (context, op, operand1, operand2, immediateCalc) {
 	// Eventually I should be able to check the types on operand 1 and 2 and perform a calculation if they are constants.
-	var v = st.addId();	// With no (first) argument, makes a temp variable.
+	var v = st.addId(undefined, SymbolTable.NUMERIC_TYPE);	// With no (first) argument, makes a temp variable.
 	context.appendCode([op, v, operand1, operand2], v);
 	return v;
 };
 
-var makeVariableKnown = function (context, stackVal, type, isConstant, constantValue) {
+var makeVariableKnown = function (context, stackVal, type, isConstant, constantValue, usage) {
 	// If we know the variable, we don't have to make it known again.
 	var stEntry = st.get(stackVal);
 	var v;
 	if (stEntry) {
 		v = stEntry.name;
 	} else {
-		v = st.addId(stackVal, undefined, isConstant, constantValue, type);
+		v = st.addId(stackVal, type, isConstant, constantValue, usage);
 	}
 	return v;
 };
@@ -86,7 +86,6 @@ var prods = [
 		var funcName = stack[2].val;
 		var funcId = st.get(funcName, "function");
 		if (funcId) console.log("warning, function " + funcName + " has been defined more than once.");
-//		funcId = st.addId(funcName, undefined, true, undefined, SymbolTable.FUNCTION_TYPE);
 		funcId = st.addId(funcName, undefined, undefined, undefined, SymbolTable.FUNCTION_TYPE);
 		context.appendCode(["function", funcId, funcName]);
 
@@ -94,24 +93,20 @@ var prods = [
 		context.appendContext(stack[6].val);
 		var argumentCount = stack[6].val.d.length;
 
-		// Tack on the explicit (user) arguments.
-		var localVariableCount = 0;
-		st.array(function (a) {
-			if (a.type === SymbolTable.LOCAL_VARIABLE_TYPE || a.type === SymbolTable.NUMERIC_TEMP_TYPE) {
-				context.appendCode(["declare", a.name, a.type]);
-
-				localVariableCount++;
-			}
+		var localVariables = st.getLocalVariables();
+		var localVariableCount = localVariables.length;
+		localVariables.forEach(function (lv) {
+			context.appendCode(["declare", lv.name, lv.type]);
 		});
 
 		// Now a section for array bounds. There's no reason to have these mixed in with the declarations.
 		// That only makes parsing harder.
-		st.array(function (a) {
-			if (a.isArray && (a.type === SymbolTable.LOCAL_VARIABLE_TYPE || a.type === SymbolTable.NUMERIC_TEMP_TYPE)) {
-				a.bounds.forEach(function (arr) {
-					context.appendCode(["array", a.name, arr]);
+		localVariables.forEach(function (lv) {
+			if (lv.isArray) {
+				lv.bounds.forEach(function (arr) {
+					context.appendCode(["array", lv.name, arr]);
 				});
-				SymbolTable.calculateArrayIndexMultipliers(a);
+				SymbolTable.calculateArrayIndexMultipliers(lv);
 			}
 		});
 
@@ -156,7 +151,7 @@ var prods = [
 	}),
 	new Production("DECL_ID", ["id", "ARRAY_STUFF"], function (context, stack) {
 		// add the id to the symbol table,...
-		var v = makeVariableKnown(context, stack[0].val, SymbolTable.LOCAL_VARIABLE_TYPE, false);
+		var v = makeVariableKnown(context, stack[0].val, SymbolTable.NUMERIC_TYPE, false);
 
 		// ...and set its bounds and dimensions
 		if (stack[2].val.getHandle() !== "") {
@@ -194,12 +189,12 @@ var prods = [
 	}),
 	new Production("ONE_OR_MORE_ARGS", ["ONE_OR_MORE_ARGS", ",", "id"], function (context, stack) {
 		context.appendContext(stack[0].val);
-		var v = makeVariableKnown(context, stack[4].val, SymbolTable.ARGUMENT_VARIABLE_TYPE, true);	// Calling this a constant since I am thinking it should be pass-by-value
-		context.appendCode(["arg", v, stack[4].val], "(ONE_OR_MORE_ARGS -> ONE_OR_MORE_ARGS)");
+		var v = makeVariableKnown(context, stack[4].val, SymbolTable.NUMERIC_TYPE, true, undefined, SymbolTable.ARGUMENT_VARIABLE_TYPE);	// Calling this a constant since I am thinking it should be pass-by-value
+		context.appendCode(["arg", v, st.get(v).usage], "(ONE_OR_MORE_ARGS -> ONE_OR_MORE_ARGS)");
 	}),
 	new Production("ONE_OR_MORE_ARGS", ["id"], function (context, stack) {
-		var v = makeVariableKnown(context, stack[0].val, SymbolTable.ARGUMENT_VARIABLE_TYPE, true);	// Calling this a constant since I am thinking it should be pass-by-value
-		context.appendCode(["arg", v, stack[0].val], "(ONE_OR_MORE_ARGS->id)");
+		var v = makeVariableKnown(context, stack[0].val, SymbolTable.NUMERIC_TYPE, true, undefined, SymbolTable.ARGUMENT_VARIABLE_TYPE);	// Calling this a constant since I am thinking it should be pass-by-value
+		context.appendCode(["arg", v, st.get(v).usage], "(ONE_OR_MORE_ARGS->id)");
 	}),
 	new Production("INITIAL_SLIST", ["DECLARATIONS", "S"], Context.straightCopy),
 	new Production("INITIAL_SLIST", ["{", "DECLARATIONS", "L", "}"], Context.straightCopy),
@@ -313,8 +308,8 @@ var prods = [
 		var first = stack[2].val;
 
 		context.appendContext(first);
-		var zero = makeVariableKnown(context, "0", SymbolTable.INTEGER_CONST_TYPE, true, 0);
-		var v = st.addId();
+		var zero = makeVariableKnown(context, "0", SymbolTable.NUMERIC_TYPE, true, 0);
+		var v = st.addId(undefined, SymbolTable.NUMERIC_TYPE);
 		context.appendCode(["subtract", v, zero, first.getHandle()], v);
 	}),
 	new Production("UNARY", ["F"], Context.straightCopy),
@@ -348,7 +343,7 @@ var prods = [
 						// At this point we can do bounds checking (sometimes) and perform the offset calculation
 						// for the intermediate code.
 
-						var sum = st.addId();
+						var sum = st.addId(undefined, SymbolTable.NUMERIC_TYPE);
 						if (!v.boundsMult) SymbolTable.calculateArrayIndexMultipliers(v);
 						for (var i = 0; i < v.bounds.length; i++) {
 							var tmp = binopRaw(context, "mult", ind[i], v.boundsMult[i]);
@@ -370,12 +365,12 @@ var prods = [
 	}),
 	new Production("F", ["integer_numeric"], function (context, stack) {
 		//var v = stack[0].val + ":" + SymbolTable.INTEGER_CONST_TYPE;
-		var v = st.addId(undefined, undefined, true, stack[0].val);
+		var v = st.addId(undefined, SymbolTable.NUMERIC_TYPE, true, stack[0].val);
 		context.setHandle(v);
 	}),
 	new Production("F", ["floating_numeric"], function (context, stack) {
 //		var v = stack[0].val + ":" + SymbolTable.FLOATING_CONST_TYPE;
-		var v = st.addId(undefined, undefined, true, stack[0].val);
+		var v = st.addId(undefined, SymbolTable.NUMERIC_TYPE, true, stack[0].val);
 		context.setHandle(v);
 	}),
 	new Production("F", ["(", "EXPR", ")"], Context.straightCopy),
@@ -394,7 +389,7 @@ var prods = [
 			}
 		}
 		context.appendCode(["pop", numberOfArguments - 1]); // subtract one - the return value will be cleaned up later
-		var v = st.addId();
+		var v = st.addId(undefined, SymbolTable.NUMERIC_TYPE);
 		context.appendCode(["retval", v]);
 		context.setHandle(v);
 	}),

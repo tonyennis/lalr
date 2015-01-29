@@ -10,16 +10,16 @@ var Token = require("./Token"),
 	Context = require("./Context");
 
 var LALR1Parser = module.exports = function (logger) {
-	this.logger = logger;
+	//console.log = logger;
 };
 
 LALR1Parser.prototype.parse = function (lalr1, input, reductions, options) {
 	options = options || {};
 
-	if (options.showTable) this.logger.log(lalr1.tableString());
-	if (options.showProductions) this.logger.log(lalr1.productionsString());
-	if (options.showItemsets) this.logger.log(lalr1.sets);
-	if (options.showFirstAndFollow) this.logger.log(lalr1.firstFollowToString());
+	if (options.showTable) console.log(lalr1.tableString());
+	if (options.showProductions) console.log(lalr1.productionsString());
+	if (options.showItemsets) console.log(lalr1.sets.toString());
+	if (options.showFirstAndFollow) console.log(lalr1.firstFollowToString());
 
 	if (options.noParse) return undefined;
 
@@ -31,7 +31,7 @@ LALR1Parser.prototype.parse = function (lalr1, input, reductions, options) {
 		var sourceLine = new SourceLine();
 		sourceLine.add(input[0]);
 		while (!exit) {
-			if (options.showStack) this.logger.log("stack: " + stack.join(" ") + "\tinput:" + input);
+			if (options.showStack) console.log("stack: " + stack.join(" ") + "\tinput:" + input);
 			if (++panic === 1000) throw new Error("Panic. Guru meditation: input: ", input);
 
 			var token = input[0];// || EOI;
@@ -47,7 +47,7 @@ LALR1Parser.prototype.parse = function (lalr1, input, reductions, options) {
 			}
 			else if (action instanceof AcceptAction) {
 				if (token.parserSymb !== "$") throw new Error("Guru meditation: Expected to be at end-of-input.\nstack:" + stack + "\ninput:" + input);
-				//this.logger.log("accepted");
+				//console.log("accepted");
 				// The only 'accepted' way out of this function is through this exit. Everything else is an exception.
 				exit = true;
 			}
@@ -68,20 +68,20 @@ LALR1Parser.prototype.parse = function (lalr1, input, reductions, options) {
 				throw new Error("Guru meditation: Found GotoAction out of context.\naction:" + action.toString() + "\nrow:" + tos.parserSymb + "\ninput:" + input + "\nstack:" + stack);
 			}
 			else {
-				throw new Error("Guru meditation: unknown table code '" + action + "'. Particulars are\nstack: " + stack + "\ntoken: " + token + "\ninput:" + input);
+				throw new Error("Guru meditation: unknown table code '" + action + "'. Particulars are\nstack: " + stack + "\nstate:"+tos+"\ntoken: " + token + "\ninput:" + input);
 			}
 		}
 		// This hurts. But the parser table seems to be correct. I would like the stack to be empty. But that's not
 		// how it seems to work! See Dragon, 1977 ed, pg 201, figure 6.3, for an example.
 		stack.pop(); // Toss the navigation token
 		var result = stack[stack.length - 1].val;
-		if (!options.pTerse) this.logger.log("result is *" + result);
+		if (!options.pTerse) console.log("result is *" + result);
 		return result;
 	} catch (err) {
 		if (err.message.indexOf("Guru") !== 0) {
 			throw err;
 		}
-		this.logger.log(err);
-		return undefined;
+		console.log(err);
+		return result;	// hail mary
 	}
 };

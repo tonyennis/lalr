@@ -12,6 +12,14 @@ OffsetTable.prototype.clearSymbolTable = function () {
 	this.table = {};
 };
 
+/**
+ * Liking the two different symbol table classes less and less.
+ * @type {string}
+ */
+OffsetTable.RETURN_VARIABLE_TYPE = SymbolTable.RETURN_VARIABLE_TYPE;
+OffsetTable.LOCAL_VARIABLE_TYPE = SymbolTable.LOCAL_VARIABLE_TYPE;
+OffsetTable.ARGUMENT_VARIABLE_TYPE = SymbolTable.ARGUMENT_VARIABLE_TYPE;
+
 OffsetTable.prototype.get = function (v) {
 	return this.table[v];
 };
@@ -91,11 +99,10 @@ OffsetTable.prototype.offset = function (v) {
 };
 
 OffsetTable.LOCAL_VARIABLE_TYPES = [
-	SymbolTable.NUMERIC_TEMP_TYPE, SymbolTable.LOCAL_VARIABLE_TYPE
-	//, SymbolTable.ARGUMENT_VARIABLE_TYPE, SymbolTable.RETURN_VARIABLE_TYPE
+	OffsetTable.LOCAL_VARIABLE_TYPE
 ];
 
-OffsetTable.STACK_FRAME_VARIABLE_TYPES = [SymbolTable.NUMERIC_TEMP_TYPE, SymbolTable.LOCAL_VARIABLE_TYPE,
+OffsetTable.STACK_FRAME_VARIABLE_TYPES = [ SymbolTable.LOCAL_VARIABLE_TYPE,
 	SymbolTable.ARGUMENT_VARIABLE_TYPE, SymbolTable.RETURN_VARIABLE_TYPE];
 
 OffsetTable.prototype.getNumberOfLocals = function () {
@@ -119,7 +126,7 @@ OffsetTable.prototype.setOffsets = function() {
 	var firstDecl = true;
 	var offset = symbs.length;
 	for(var i=0; i<symbs.length; i++) {
-		if (OffsetTable.LOCAL_VARIABLE_TYPES.indexOf(symbs[i].type) >= 0 && firstDecl) {
+		if (OffsetTable.LOCAL_VARIABLE_TYPES.indexOf(symbs[i].usage) >= 0 && firstDecl) {
 			firstDecl = false;
 			offset--;	// skip the return address which is nestled between the arguments and the local variables.
 		}
@@ -132,7 +139,7 @@ OffsetTable.prototype.getArguments = function () {
 	var keys = Object.keys(this.table);
 	for(var i = 0; i<keys.length; i++) {
 		var e = this.table[keys[i]];
-		if (e.type === SymbolTable.ARGUMENT_VARIABLE_TYPE) arguments.push(e);
+		if (e.usage === OffsetTable.ARGUMENT_VARIABLE_TYPE) arguments.push(e);
 	}
 	return arguments;
 };
@@ -151,7 +158,7 @@ OffsetTable.prototype.findReturnVariable = function() {
 	var keys = Object.keys(this.table);
 	for(var i = 0; i<keys.length; i++) {
 		var e = this.table[keys[i]];
-		if (e.type === SymbolTable.RETURN_VARIABLE_TYPE) return e;
+		if (e.usage === OffsetTable.RETURN_VARIABLE_TYPE) return e;
 	}
 	return undefined;
 };
@@ -161,7 +168,7 @@ OffsetTable.prototype.getLocals = function () {
 	var keys = Object.keys(this.table);
 	for(var i = 0; i<keys.length; i++) {
 		var e = this.table[keys[i]];
-		if (OffsetTable.LOCAL_VARIABLE_TYPES.indexOf(e.type) >= 0) locals.push(e);
+		if (OffsetTable.LOCAL_VARIABLE_TYPES.indexOf(e.usage) >= 0) locals.push(e);
 	}
 	return locals;
 };
