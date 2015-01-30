@@ -27,6 +27,7 @@ declare,82:numeric,numeric
 declare,81:numeric,numeric
 declare,80:numeric,numeric
 declare,79:numeric,numeric
+declare,78:numeric,numeric
 array,d:numeric,3
 array,e:numeric,4
 array,e:numeric,5
@@ -47,6 +48,8 @@ mult,81:numeric,88:numeric,8
 add,83:numeric,83:numeric,81:numeric
 mult,80:numeric,84:numeric,1
 add,83:numeric,83:numeric,80:numeric
+indirect,79:numeric,f:numeric
+add,a:numeric,79:numeric,83:numeric
 assign,99:numeric,a:numeric
-pop,26
+pop,27
 end_function,main

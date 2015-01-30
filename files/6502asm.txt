@@ -6,8 +6,9 @@
 label_main:
 ;	******************************************************************
 ;	* Stack frame information
-;	* return_variable	99:numeric	offset:28
-;	* argument_variable	q:numeric	offset:27
+;	* return_variable	99:numeric	offset:29
+;	* argument_variable	q:numeric	offset:28
+;	* local_variable	78:numeric	offset:26
 ;	* local_variable	79:numeric	offset:25
 ;	* local_variable	80:numeric	offset:24
 ;	* local_variable	81:numeric	offset:23
@@ -37,7 +38,7 @@ label_main:
 ;	******************************************************************
 	tsx
 	txa
-	sbc	#$26
+	sbc	#$27
 	tax
 	txs
 ;	add  , 96:numeric , 98:numeric , 97:numeric
@@ -109,14 +110,25 @@ label_main:
 	lda	($21,X)
 	adc	($24,X)
 	sta	$21,X
+;	indirect  , 79:numeric , f:numeric
+	tsx
+	lda	($5,X)
+	tax
+	lda	($0,X)
+	sta	$25,X
+;	add  , a:numeric , 79:numeric , 83:numeric
+	tsx
+	lda	($25,X)
+	adc	($21,X)
+	sta	$0,X
 ;	assign  , 99:numeric , a:numeric
 	tsx
 	lda	($0,X)
-	sta	$28,X
-;	pop  , 26
+	sta	$29,X
+;	pop  , 27
 	tsx
 	txa
-	adc	#$26
+	adc	#$27
 	tax
 	txs
 ;	end_function  , main

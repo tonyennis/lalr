@@ -337,7 +337,7 @@ var prods = [
 						console.log("Error, wrong number of array indices for " + v + ". Saw " + ind.length + ", expected " + v.bounds.length);
 						context.setHandle("0");
 					} else {
-
+						var tmp;
 						context.appendContext(stack[2].val);
 
 						// At this point we can do bounds checking (sometimes) and perform the offset calculation
@@ -346,16 +346,16 @@ var prods = [
 						var sum = st.addId(undefined, SymbolTable.NUMERIC_TYPE);
 						if (!v.boundsMult) SymbolTable.calculateArrayIndexMultipliers(v);
 						for (var i = 0; i < v.bounds.length; i++) {
-							var tmp = binopRaw(context, "mult", ind[i], v.boundsMult[i]);
+							tmp = binopRaw(context, "mult", ind[i], v.boundsMult[i]);
 							if (i === 0) {
 								context.appendCode(["assign", sum, tmp], sum);
 							} else {
 								context.appendCode(["add", sum, sum, tmp], sum);
 							}
 						}
-						context.appendCode(["get the base addr for " + stack[0].val + " from the stack"]);
-						context.appendCode(["calculate the indirect address"]);
-						tmp = binopRaw(context, "add", "(" + stack[0].val + ")", sum);
+						tmp = st.addId(undefined, SymbolTable.NUMERIC_TYPE, false, undefined, SymbolTable.LOCAL_VARIABLE_TYPE);
+						context.appendCode(["indirect", tmp, st.get(stack[0].val).name]);
+						tmp = binopRaw(context, "add", tmp, sum);
 
 						context.setHandle(tmp);
 					}

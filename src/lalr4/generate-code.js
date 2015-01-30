@@ -17,7 +17,7 @@ var patterns = [
 	['const', /^\d+:[a-z]+_const/],
 	['label_name', /^\d+:label/],
 	['ext_id', /^[0-9A-Za-z_]+:[A-Za-z_]+/],
-	[undefined, /^(argument_variable|return_variable)/],
+	[undefined, /^(argument_variable|return_variable|indirect)/],
 	[undefined, /^(function|arg|declare|end_function|local_variable|,|assign|label|goto_if_false|goto)/],
 	[undefined, /^(numeric_temp|mult|div|add|subtract|push_arg_count|push_arg|push_return_arg|call|pop|retval|result)/],
 	[undefined, /^(test_lt|test_eq|test_gt|array|numeric)/],
@@ -365,6 +365,17 @@ var prods = [
 			context.append([
 				fmt("pla"),
 				fmt("tsx"),
+				fmt("sta", "$" + offset(stack[4].val) + ",X")
+			]);
+			context.setHandle(stack[4].val.getHandle());
+		}),
+		new Production("PART", ['indirect', COMMA, 'EXT_ID', COMMA, 'EXT_ID'], function (context, stack, sourceLine) {
+			context.append([fmtSource(sourceLine)]);
+			context.append([
+				fmt("tsx"),
+				fmt("lda", "($" + offset(stack[8].val) + ",X)"),
+				fmt("tax"),
+				fmt("lda", "($0,X)"),
 				fmt("sta", "$" + offset(stack[4].val) + ",X")
 			]);
 			context.setHandle(stack[4].val.getHandle());
